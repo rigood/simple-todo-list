@@ -1,6 +1,12 @@
+import styled from "styled-components";
 import { useForm } from "react-hook-form";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import { Categories, categoryState, todoState } from "../atoms";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { categoriesState, categoryState, todoState } from "../atoms";
+import React from "react";
+
+const CreateToDoContainer = styled.div`
+  margin-bottom: 20px;
+`;
 
 interface IForm {
   todo: string;
@@ -8,16 +14,23 @@ interface IForm {
 
 function CreateToDo() {
   const { register, handleSubmit, setValue } = useForm<IForm>();
-  const todos = useRecoilValue(todoState);
+
   const setTodos = useSetRecoilState(todoState);
-  const category = useRecoilValue(categoryState);
+
+  const [category, setCategory] = useRecoilState(categoryState);
+  const [categories, setCategories] = useRecoilState(categoriesState);
+
   const handleValid = ({ todo }: IForm) => {
     setTodos((oldTodos) => [{ text: todo, id: Date.now(), category: category }, ...oldTodos]);
     setValue("todo", "");
   };
-  console.log(todos);
+
+  const handleOption = (event: React.FormEvent<HTMLSelectElement>) => {
+    setCategory(event.currentTarget.value as any);
+  };
+
   return (
-    <div>
+    <CreateToDoContainer>
       <form onSubmit={handleSubmit(handleValid)}>
         <input
           {...register("todo", {
@@ -25,8 +38,13 @@ function CreateToDo() {
           })}
           placeholder="Write a to-do."
         />
+        <select value={category} onInput={handleOption}>
+          {categories.map((category, idx) => (
+            <option key={idx}>{category}</option>
+          ))}
+        </select>
       </form>
-    </div>
+    </CreateToDoContainer>
   );
 }
 
