@@ -67,8 +67,7 @@ function Todo({ text, id, category }: ITodo) {
       <TodoText>{text}</TodoText>
       <TodoControllers>
         <span>카테고리 이동</span>
-        <select onInput={changeCategory}>
-          <option hidden>Choose category</option>
+        <select value={category} onInput={changeCategory}>
           {categories.map((cate, idx) => (
             <option key={idx} value={cate} hidden={cate === category}>
               {cate}
