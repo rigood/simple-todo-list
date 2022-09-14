@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "styled-components";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { categoriesState, categoryState, todoSelector, todoState } from "../atoms";
@@ -10,11 +9,25 @@ const TodoListContainer = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 400px;
+  margin: 20px auto;
+`;
+
+const Title = styled.h1`
+  margin: 20px 0;
+  font-size: 3rem;
+  font-weight: bold;
 `;
 
 const CategoryContainer = styled.div`
   display: flex;
+  justify-content: space-between;
+  width: 100%;
   margin: 20px auto;
+  select {
+    flex: 1;
+    margin-right: 20px;
+  }
 `;
 
 function TodoList() {
@@ -34,20 +47,20 @@ function TodoList() {
         return;
       }
       setCategories([...categories, categoryInput]);
-      setCategory(categoryInput);
     }
   };
 
   return (
     <>
       <TodoListContainer>
+        <Title>📋 MY TODO LIST</Title>
         <CategoryContainer>
           <select value={category} onInput={onInput}>
             {categories.map((category, idx) => (
               <option key={idx}>{category}</option>
             ))}
           </select>
-          <button onClick={handleAddCategory}>카테고리 추가</button>
+          <button onClick={handleAddCategory}>Add category</button>
         </CategoryContainer>
         <CreateToDo />
         {todos?.map((todo) => (

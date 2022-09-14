@@ -1,48 +1,55 @@
-import React from "react";
 import styled from "styled-components";
-import { useRecoilState, useSetRecoilState } from "recoil";
-import { categoriesState, ITodo, todoState } from "../atoms";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { categoriesState, categoryState, ITodo, todoState } from "../atoms";
 
 const TodoItem = styled.div`
   display: flex;
-  justify-content: space-between;
-  width: 400px;
-  margin-bottom: 10px;
-  padding: 10px;
-  border: 1px solid gray;
+  flex-direction: column;
+  margin-bottom: 20px;
+  width: 100%;
+  padding: 20px;
   border-radius: 10px;
+  background-color: white;
 `;
 
-const TodoText = styled.span``;
+const TodoCategory = styled.span`
+  display: inline-block;
+  width: fit-content;
+  margin-bottom: 20px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background-color: teal;
+  color: white;
+  font-size: 1.6rem;
+`;
 
-const TodoCategory = styled.span``;
+const TodoText = styled.h1`
+  margin-bottom: 20px;
+  padding: 20px 10px;
+  border-radius: 10px;
+  border: 1px solid lightgray;
 
-const TodoDeleteBtn = styled.div``;
+  font-size: 2.4rem;
+`;
 
-const TodoCategoryBtns = styled.div`
+const TodoControllers = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  button:first-child {
-    margin-right: 10px;
+  align-items: center;
+  span {
+    margin-right: 5px;
+    font-size: 1.2rem;
+  }
+  select {
+    margin-right: 20px;
   }
 `;
 
 function Todo({ text, id, category }: ITodo) {
   const setTodos = useSetRecoilState(todoState);
-
-  const [categories, setCategories] = useRecoilState(categoriesState);
+  const categories = useRecoilValue(categoriesState);
 
   const handleDelete = () => {
     setTodos((oldTodos) => oldTodos.filter((todo) => todo.id !== id));
-  };
-
-  const handleCategory = (event: React.MouseEvent<HTMLButtonElement>) => {
-    const name = event.currentTarget.name;
-    setTodos((oldTodos) => {
-      const targetIndex = oldTodos.findIndex((todo) => todo.id === id);
-      const newTodo = { text, id, category: name as any };
-      return [...oldTodos.slice(0, targetIndex), newTodo, ...oldTodos.slice(targetIndex + 1)];
-    });
   };
 
   const changeCategory = (event: React.FormEvent<HTMLSelectElement>) => {
@@ -56,20 +63,21 @@ function Todo({ text, id, category }: ITodo) {
 
   return (
     <TodoItem>
-      <TodoText>{text}</TodoText>
       <TodoCategory>{category}</TodoCategory>
-      <TodoDeleteBtn>
-        <button onClick={handleDelete}>Delete</button>
-      </TodoDeleteBtn>
-      <TodoCategoryBtns>
-        <select value={category} onInput={changeCategory}>
-          {categories.map((category, idx) => (
-            <option key={idx} value={category}>
-              {category}
+      <TodoText>{text}</TodoText>
+      <TodoControllers>
+        <span>카테고리 이동</span>
+        <select onInput={changeCategory}>
+          <option hidden>Choose category</option>
+          {categories.map((cate, idx) => (
+            <option key={idx} value={cate} hidden={cate === category}>
+              {cate}
             </option>
           ))}
         </select>
-      </TodoCategoryBtns>
+        <span>삭제</span>
+        <button onClick={handleDelete}>Delete</button>
+      </TodoControllers>
     </TodoItem>
   );
 }

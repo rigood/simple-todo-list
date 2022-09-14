@@ -8,11 +8,21 @@ ${reset};
 *{
   box-sizing: border-box;
 }
+html{
+  font-size: 62.5%;
+}
 body{
   font-family: 'Noto Sans KR', sans-serif;
+  background-color: #cfd2d9;
 }
-select, button, input::placeholder{
+input, button, select, option{
   font-family: 'Noto Sans KR', sans-serif;
+}
+select:focus{
+  outline: none;
+}
+button{
+  cursor: pointer;
 }
 `;
 
