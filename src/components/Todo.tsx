@@ -56,8 +56,12 @@ function Todo({ text, id, category }: ITodo) {
     const value = event.currentTarget.value;
     setTodos((oldTodos) => {
       const targetIndex = oldTodos.findIndex((todo) => todo.id === id);
-      const newTodo = { text, id, category: value as any };
-      return [...oldTodos.slice(0, targetIndex), newTodo, ...oldTodos.slice(targetIndex + 1)];
+      const newTodo = { text, id, category: value };
+      return [
+        ...oldTodos.slice(0, targetIndex),
+        newTodo,
+        ...oldTodos.slice(targetIndex + 1),
+      ];
     });
   };
 

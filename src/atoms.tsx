@@ -9,6 +9,8 @@ export interface ITodo {
   text: string;
   id: number;
   category: string;
+  // 카테고리를 제한하고 싶을 때는
+  // category: "TO_DO", "DOING", "DONE";
 }
 
 export let defaultCategories: string[] = ["TO-DO", "DOING", "DONE"];
