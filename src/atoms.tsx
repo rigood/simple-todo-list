@@ -5,38 +5,44 @@ const { persistAtom } = recoilPersist({
   key: "react-todolist",
 });
 
-export interface ITodo {
-  text: string;
-  id: number;
-  category: string;
-  // 카테고리를 제한하고 싶을 때는
-  // category: "TO_DO", "DOING", "DONE";
+export enum DefaultCategories {
+  Todo = "Todo",
+  Doing = "Doing",
+  Done = "Done",
 }
 
-export let defaultCategories: string[] = ["TO-DO", "DOING", "DONE"];
+export type CategoryType = DefaultCategories | string;
 
-export const categoryState = atom<string>({
-  key: "category",
-  default: defaultCategories[0],
-});
+export interface ITodo {
+  id: number;
+  text: string;
+  category: CategoryType;
+}
 
-export const categoriesState = atom<string[]>({
+export const categoriesAtom = atom<string[]>({
   key: "categories",
-  default: defaultCategories,
+  default: Object.values(DefaultCategories),
   effects_UNSTABLE: [persistAtom],
 });
 
-export const todoState = atom<ITodo[]>({
-  key: "todo",
+export const todosAtom = atom<ITodo[]>({
+  key: "todos",
   default: [],
+  effects_UNSTABLE: [persistAtom],
+});
+
+export const currentCategoryAtom = atom<CategoryType>({
+  key: "currentCategory",
+  default: DefaultCategories.Todo,
   effects_UNSTABLE: [persistAtom],
 });
 
 export const todoSelector = selector({
   key: "todoSelector",
   get: ({ get }) => {
-    const todos = get(todoState);
-    const category = get(categoryState);
-    return todos.filter((todo) => todo.category === category);
+    const todos = get(todosAtom);
+    const currentCategory = get(currentCategoryAtom);
+
+    return todos.filter((todo) => todo.category === currentCategory);
   },
 });

@@ -1,88 +1,153 @@
 import styled from "styled-components";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { categoriesState, categoryState, ITodo, todoState } from "../atoms";
+import { ITodo, categoriesAtom, todosAtom } from "../atoms";
+import { useForm } from "react-hook-form";
+import { useState } from "react";
 
-const TodoItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 20px;
-  width: 100%;
-  padding: 20px;
-  border-radius: 10px;
-  background-color: white;
-`;
+function Todo({ text, id, category: myCategory }: ITodo) {
+  const categories = useRecoilValue(categoriesAtom);
+  const setTodos = useSetRecoilState(todosAtom);
 
-const TodoCategory = styled.span`
-  display: inline-block;
-  width: fit-content;
-  margin-bottom: 20px;
-  padding: 6px 12px;
-  border-radius: 10px;
-  background-color: teal;
-  color: white;
-  font-size: 1.6rem;
-`;
+  const changeCategory = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const category = e.target.value;
 
-const TodoText = styled.h1`
-  margin-bottom: 20px;
-  padding: 20px 10px;
-  border-radius: 10px;
-  border: 1px solid lightgray;
-
-  font-size: 2.4rem;
-`;
-
-const TodoControllers = styled.div`
-  display: flex;
-  align-items: center;
-  span {
-    margin-right: 5px;
-    font-size: 1.2rem;
-  }
-  select {
-    margin-right: 20px;
-  }
-`;
-
-function Todo({ text, id, category }: ITodo) {
-  const setTodos = useSetRecoilState(todoState);
-  const categories = useRecoilValue(categoriesState);
-
-  const handleDelete = () => {
-    setTodos((oldTodos) => oldTodos.filter((todo) => todo.id !== id));
+    setTodos((todos) =>
+      todos.map((todo) => (todo.id === id ? { ...todo, category } : todo))
+    );
   };
 
-  const changeCategory = (event: React.FormEvent<HTMLSelectElement>) => {
-    const value = event.currentTarget.value;
-    setTodos((oldTodos) => {
-      const targetIndex = oldTodos.findIndex((todo) => todo.id === id);
-      const newTodo = { text, id, category: value };
-      return [
-        ...oldTodos.slice(0, targetIndex),
-        newTodo,
-        ...oldTodos.slice(targetIndex + 1),
-      ];
-    });
+  const deleteTodo = () => {
+    setTodos((todos) => todos.filter((todo) => todo.id !== id));
   };
+
+  const { register, handleSubmit, setFocus } = useForm();
+  const [isEditing, setIsEditing] = useState(false);
+
+  const setEditingMode = () => {
+    setIsEditing(true);
+    setFocus("todoText");
+  };
+
+  const editTodo = handleSubmit(({ todoText }) => {
+    if (todoText === "") {
+      setFocus("todoText");
+      return;
+    }
+
+    setTodos((todos) =>
+      todos.map((todo) => (todo.id === id ? { ...todo, text: todoText } : todo))
+    );
+
+    setIsEditing(false);
+  });
 
   return (
-    <TodoItem>
-      <TodoCategory>{category}</TodoCategory>
-      <TodoText>{text}</TodoText>
-      <TodoControllers>
-        <span>카테고리 이동</span>
-        <select value={category} onInput={changeCategory}>
-          {categories.map((cate, idx) => (
-            <option key={idx} value={cate} hidden={cate === category}>
-              {cate}
-            </option>
+    <Wrapper>
+      <Row>
+        <CategorySelect value={myCategory} onChange={changeCategory}>
+          {categories.map((category) => (
+            <CategoryOption
+              key={category}
+              value={category}
+              hidden={category === myCategory}
+            >
+              {category}
+            </CategoryOption>
           ))}
-        </select>
-        <span>삭제</span>
-        <button onClick={handleDelete}>Delete</button>
-      </TodoControllers>
-    </TodoItem>
+        </CategorySelect>
+        <Buttons>
+          <Button type="button" onClick={setEditingMode} disabled={isEditing}>
+            {isEditing ? "수정중" : "수정"}
+          </Button>
+          <Button type="button" onClick={deleteTodo}>
+            삭제
+          </Button>
+        </Buttons>
+      </Row>
+      <TodoTextForm onSubmit={editTodo}>
+        <TodoTextInput
+          type="text"
+          {...register("todoText", {
+            required: true,
+            value: text,
+            onBlur: editTodo,
+          })}
+          placeholder="할일을 입력해주세요."
+          isEditing={isEditing}
+          readOnly={!isEditing}
+        />
+      </TodoTextForm>
+      <CreatedAt>
+        {new Intl.DateTimeFormat("ko-KR", {
+          dateStyle: "short",
+          timeStyle: "short",
+        }).format(id)}
+      </CreatedAt>
+    </Wrapper>
   );
 }
 
 export default Todo;
+
+const Wrapper = styled.li`
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+  padding: 20px;
+  border-radius: var(--border-radius);
+  background-color: white;
+`;
+
+const Row = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const CategorySelect = styled.select`
+  width: fit-content;
+  border: 1px solid transparent;
+  border-bottom: none;
+
+  &:focus {
+    border-color: black;
+  }
+`;
+
+const CategoryOption = styled.option``;
+
+const Buttons = styled.div`
+  display: flex;
+  column-gap: 5px;
+`;
+
+const Button = styled.button`
+  padding: 0 4px;
+`;
+
+const TodoTextForm = styled.form``;
+
+const TodoTextInput = styled.input<{ isEditing: boolean }>`
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--lightgray);
+  border-color: ${({ isEditing }) => isEditing && "var(--primary)"};
+  outline: ${({ isEditing }) =>
+    isEditing ? "2px solid var(--primary)" : "none"};
+  border-radius: var(--border-radius);
+  font-size: 1.6rem;
+  cursor: ${({ isEditing }) => (isEditing ? "text" : "default")};
+
+  &:focus {
+    &::placeholder {
+      opacity: 0.5;
+    }
+  }
+`;
+
+const CreatedAt = styled.span`
+  text-align: end;
+  margin-right: 5px;
+  font-size: 1.2rem;
+  color: var(--darkgray);
+`;

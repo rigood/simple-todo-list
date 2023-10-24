@@ -1,5 +1,5 @@
 {
-  "name": "todolist-practice",
+  "name": "simple-todo-list",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -49,5 +49,5 @@
       "last 1 safari version"
     ]
   },
-  "homepage": "https://rigood.github.io/todo-list"
+  "homepage": "https://rigood.github.io/simple-todo-list"
 }
