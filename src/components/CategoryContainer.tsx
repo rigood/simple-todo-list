@@ -1,10 +1,10 @@
 import styled from "styled-components";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { categoriesAtom, currentCategoryAtom } from "../atoms";
+import { categoriesState, currentCategoryState } from "../recoil";
 
 const CategoryContainer = () => {
-  const [categories, setCategories] = useRecoilState(categoriesAtom);
-  const setCurrentCategory = useSetRecoilState(currentCategoryAtom);
+  const [categories, setCategories] = useRecoilState(categoriesState);
+  const setCurrentCategory = useSetRecoilState(currentCategoryState);
 
   const onCategorySelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCurrentCategory(e.target.value);

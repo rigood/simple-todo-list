@@ -1,19 +1,19 @@
 import styled from "styled-components";
-import { useRecoilValue } from "recoil";
-import { todoSelector, currentCategoryAtom } from "./atoms";
+import { useRecoilValue, useRecoilState } from "recoil";
+import {
+  currentCategoryState,
+  filteredTodosState,
+  isSortedByLatestState,
+} from "./recoil";
 import CategoryContainer from "./components/CategoryContainer";
 import TodoCreator from "./components/TodoCreator";
 import Todo from "./components/Todo";
-import { useState } from "react";
 
 function App() {
-  const todos = useRecoilValue(todoSelector);
-  const currentCategory = useRecoilValue(currentCategoryAtom);
-
-  const [sortByLatest, setSortByLatest] = useState(true);
-
-  const sortedTodos = [...todos].sort(
-    sortByLatest ? (a, b) => b.id - a.id : (a, b) => a.id - b.id
+  const currentCategory = useRecoilValue(currentCategoryState);
+  const filteredTodos = useRecoilValue(filteredTodosState);
+  const [isSortedByLatest, setIsSortedByLatest] = useRecoilState(
+    isSortedByLatestState
   );
 
   return (
@@ -23,22 +23,22 @@ function App() {
         <CategoryContainer />
         <TodoCreator />
         <TodoList>
-          {todos.length === 0 ? (
+          {filteredTodos.length === 0 ? (
             <Message>
               {currentCategory} 카테고리에 등록된 할일이 없습니다.
             </Message>
           ) : (
             <>
               <Row>
-                <Count>총 {todos.length}개의 할일</Count>
+                <Count>총 {filteredTodos.length}개의 할일</Count>
                 <SortButton
                   type="button"
-                  onClick={() => setSortByLatest((prev) => !prev)}
+                  onClick={() => setIsSortedByLatest((prev) => !prev)}
                 >
-                  ↓ {sortByLatest ? "최신순" : "과거순"}
+                  ↓ {isSortedByLatest ? "최신순" : "과거순"}
                 </SortButton>
               </Row>
-              {sortedTodos.map((todo) => (
+              {filteredTodos.map((todo) => (
                 <Todo key={todo.id} {...todo} />
               ))}
             </>

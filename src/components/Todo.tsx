@@ -1,12 +1,12 @@
 import styled from "styled-components";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { ITodo, categoriesAtom, todosAtom } from "../atoms";
+import { ITodo, categoriesState, todosState } from "../recoil";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 
 function Todo({ text, id, category: myCategory }: ITodo) {
-  const categories = useRecoilValue(categoriesAtom);
-  const setTodos = useSetRecoilState(todosAtom);
+  const categories = useRecoilValue(categoriesState);
+  const setTodos = useSetRecoilState(todosState);
 
   const changeCategory = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const category = e.target.value;
@@ -24,16 +24,20 @@ function Todo({ text, id, category: myCategory }: ITodo) {
   const [isEditing, setIsEditing] = useState(false);
 
   const setEditingMode = () => {
-    setIsEditing(true);
-    setFocus("todoText");
+    if (isEditing) {
+      editTodo();
+    } else {
+      setIsEditing(true);
+      setFocus("todoText");
+    }
+  };
+
+  const handleEditTodo = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (e.relatedTarget?.id === "editBtn") return;
+    editTodo();
   };
 
   const editTodo = handleSubmit(({ todoText }) => {
-    if (todoText === "") {
-      setFocus("todoText");
-      return;
-    }
-
     setTodos((todos) =>
       todos.map((todo) => (todo.id === id ? { ...todo, text: todoText } : todo))
     );
@@ -56,8 +60,13 @@ function Todo({ text, id, category: myCategory }: ITodo) {
           ))}
         </CategorySelect>
         <Buttons>
-          <Button type="button" onClick={setEditingMode} disabled={isEditing}>
-            {isEditing ? "수정중" : "수정"}
+          <Button
+            type="button"
+            id="editBtn"
+            onClick={setEditingMode}
+            isEditing={isEditing}
+          >
+            {isEditing ? "완료" : "수정"}
           </Button>
           <Button type="button" onClick={deleteTodo}>
             삭제
@@ -70,7 +79,7 @@ function Todo({ text, id, category: myCategory }: ITodo) {
           {...register("todoText", {
             required: true,
             value: text,
-            onBlur: editTodo,
+            onBlur: handleEditTodo,
           })}
           placeholder="할일을 입력해주세요."
           isEditing={isEditing}
@@ -118,11 +127,16 @@ const CategoryOption = styled.option``;
 
 const Buttons = styled.div`
   display: flex;
-  column-gap: 5px;
+  column-gap: 2px;
 `;
 
-const Button = styled.button`
+const Button = styled.button<{ isEditing?: boolean }>`
   padding: 0 4px;
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  font-weight: ${({ isEditing }) => isEditing && "bold"};
+  color: ${({ isEditing }) => isEditing && "var(--primary)"};
 `;
 
 const TodoTextForm = styled.form``;

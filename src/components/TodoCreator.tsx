@@ -1,21 +1,19 @@
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { currentCategoryAtom, todosAtom } from "../atoms";
+import { currentCategoryState, todosState } from "../recoil";
 
 interface IForm {
   todoText: string;
 }
 
 function TodoCreator() {
-  const currentCategory = useRecoilValue(currentCategoryAtom);
-  const setTodos = useSetRecoilState(todosAtom);
+  const currentCategory = useRecoilValue(currentCategoryState);
+  const setTodos = useSetRecoilState(todosState);
 
   const { register, handleSubmit, setValue } = useForm<IForm>();
 
   const createTodo = ({ todoText }: IForm) => {
-    if (todoText === "") return;
-
     const newTodo = {
       id: Date.now(),
       text: todoText,
